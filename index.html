@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fyran | Dev</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-main: #f0f0f0;
+            --text-muted: #9e9e9e;
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .grid-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+        }
+
+        .red-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 120px;
+            height: 120px;
+            background: #ff0000;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 60px 20px rgba(255, 0, 0, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.5);
+            z-index: 1;
+            will-change: transform;
+        }
+
+        #particleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .glass-card {
+            position: relative;
+            z-index: 10;
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+            background: radial-gradient(
+                circle 300px at var(--mouse-x) var(--mouse-y), 
+                rgba(255, 255, 255, 0.12), 
+                rgba(20, 20, 25, 0.4)
+            );
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 45px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: background 0.1s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto 20px auto;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 35px;
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 20px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-item { text-align: center; flex: 1; }
+        .stat-number { display: block; font-size: 1.6rem; font-weight: bold; color: #ffffff; margin-bottom: 4px; }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .skills { 
+            margin-bottom: 35px; 
+            position: relative;
+            z-index: 2;
+        }
+        .skills-title { font-size: 1.1rem; color: #d0d0d0; margin-bottom: 15px; text-align: center; }
+        .skill-tags { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .tag { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; color: #e0e0e0; transition: all 0.3s ease; }
+        .tag:hover { background: rgba(255, 255, 255, 0.1); color: #ffffff; border-color: rgba(255, 255, 255, 0.3); }
+
+        .cta-btn {
+            display: block; width: 100%; padding: 16px; text-align: center; text-decoration: none;
+            background: rgba(255, 255, 255, 0.05); color: #ffffff; font-size: 1.05rem; font-weight: bold;
+            border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        .cta-btn:hover { background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
+
+    </style>
+</head>
+<body>
+
+    <div class="grid-background"></div>
+    <div class="red-orb"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="glass-card" id="glassCard">
+        <div class="header">
+            <img src="pfp.jpg" alt="Avatar" class="avatar">
+            <h1>Fyran</h1>
+            <p>Программист</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item"> <span class="stat-number">10+</span> <span class="stat-label">Проектов</span> </div>
+            <div class="stat-item"> <span class="stat-number">3+</span> <span class="stat-label">Года опыта</span> </div>
+            <div class="stat-item"> <span class="stat-number">100%</span> <span class="stat-label">Отдача</span> </div>
+        </div>
+
+        <div class="skills">
+            <div class="skills-title">Навыки:</div>
+            <div class="skill-tags">
+                <span class="tag">C++</span>
+                <span class="tag">Python</span>
+                <span class="tag">Go</span>
+                <span class="tag">Веб-разработка (HTML/CSS/JS)</span>
+            </div>
+        </div>
+
+        <a href="https://t.me/vortexarr" target="_blank" class="cta-btn">Связаться в Telegram</a>
+    </div>
+
+    <script>
+        const glassCard = document.getElementById('glassCard');
+        document.addEventListener('mousemove', (e) => {
+            const rect = glassCard.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            glassCard.style.setProperty('--mouse-x', `${x}px`);
+            glassCard.style.setProperty('--mouse-y', `${y}px`);
+        });
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        let ambientStarted = false;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            if (!ambientStarted) {
+                startAmbientDrone();
+                ambientStarted = true;
+            }
+        }
+        
+        document.addEventListener('click', initAudio, { once: true });
+
+        function startAmbientDrone() {
+            if (!audioCtx) return;
+            
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc1.type = 'sine';
+            osc2.type = 'triangle';
+            
+            osc1.frequency.value = 45;
+            osc2.frequency.value = 47; 
+            
+            gainNode.gain.value = 0.028;
+            
+            osc1.connect(gainNode);
+            osc2.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc1.start();
+            osc2.start();
+        }
+
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        const orb = document.querySelector('.red-orb');
+
+        let width, height, centerX, centerY;
+        let particles = [];
+        let frameCount = 0;
+        let orbScale = 1.0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            centerX = width / 2; centerY = height / 2;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const shapes = ['circle', 'square', 'triangle', 'diamond', 'star', 'cross'];
+        const colors = ['#ff4040', '#ff0000', '#ff8080', '#ffffff', '#cccccc'];
+
+        class Particle {
+            constructor() {
+                this.x = centerX; this.y = centerY;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 2; 
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.size = Math.random() * 15 + 10; 
+                this.shape = shapes[Math.floor(Math.random() * shapes.length)];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.15;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.006 + 0.003;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                this.rotation += this.rotationSpeed; this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation);
+                ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color;
+                ctx.strokeStyle = this.color; ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                if (this.shape === 'circle') { ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2); ctx.fill(); }
+                else if (this.shape === 'square') { ctx.rect(-this.size / 2, -this.size / 2, this.size, this.size); ctx.stroke(); }
+                else if (this.shape === 'triangle') { ctx.moveTo(0, -this.size/2); ctx.lineTo(this.size/2, this.size/2); ctx.lineTo(-this.size/2, this.size/2); ctx.closePath(); ctx.stroke(); }
+                else if (this.shape === 'diamond') { ctx.moveTo(0, -this.size/2); ctx.lineTo(this.size/2, 0); ctx.lineTo(0, this.size/2); ctx.lineTo(-this.size/2, 0); ctx.closePath(); ctx.fill(); }
+                else if (this.shape === 'star') { 
+                    for(let i=0; i<10; i++){ let r = (i%2===0)?this.size/2:this.size/4; let a = Math.PI*2/10*i; ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r); } 
+                    ctx.closePath(); ctx.stroke(); 
+                }
+                else if (this.shape === 'cross') { ctx.rect(-this.size/10, -this.size/2, this.size/5, this.size); ctx.rect(-this.size/2, -this.size/10, this.size, this.size/5); ctx.fill(); }
+                ctx.restore();
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            if (frameCount % 100 === 0) {
+                orbScale = 1.45;
+                
+                const burstAmount = Math.floor(Math.random() * 4) + 10;
+                
+                for (let i = 0; i < burstAmount; i++) {
+                    setTimeout(() => {
+                        particles.push(new Particle());
+                    }, i * 20);
+                }
+            }
+            frameCount++;
+            
+            orbScale += (1.0 - orbScale) * 0.1;
+            orb.style.transform = `translate(-50%, -50%) scale(${orbScale})`;
+            
+            particles.forEach(p => { p.update(); p.draw(); });
+            particles = particles.filter(p => p.alpha > 0);
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
